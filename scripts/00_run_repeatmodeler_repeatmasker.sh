@@ -40,10 +40,17 @@ RepeatModeler \
   -database "$OUTDIR/Castanea_DB" \
   -pa 12
 
-# NOTE:
-# RepeatModeler creates a directory called RM_*/ containing
-# the file consensi.fa.classified. Move or copy that file to
-# results/repeat_annotation/ before running the next step.
+# -----------------------------
+# Output tracking and validation
+# -----------------------------
+
+RM_DIR=$(find . -maxdepth 1 -type d -name 'RM_*' -printf '%T@ %p\n' \
+          | sort -n | tail -1 | cut -d' ' -f2)
+
+if [[ -z "$RM_DIR" || ! -f "$RM_DIR/consensi.fa.classified" ]]; then
+    echo "ERROR: no se encontró consensi.fa.classified en ningún RM_*"
+    exit 1
+fi
 
 REPEATMODELER_LIB="$OUTDIR/consensi.fa.classified"
 COMBINED_LIB="$OUTDIR/Castanea_TE_library.fa"
@@ -52,6 +59,7 @@ COMBINED_LIB="$OUTDIR/Castanea_TE_library.fa"
 # Combine RepeatModeler and LTR_retriever libraries
 # -----------------------------
 
+cp "$RM_DIR/consensi.fa.classified" "$REPEATMODELER_LIB"
 cat "$REPEATMODELER_LIB" "$LTR_LIB" > "$COMBINED_LIB"
 
 # -----------------------------
